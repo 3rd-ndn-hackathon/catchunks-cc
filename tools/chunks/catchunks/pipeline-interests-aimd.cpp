@@ -265,7 +265,10 @@ void PipelineInterestsAimd::handleData(const Interest& interest, const Data& dat
 
 	if (segInfo.state == SegmentState::FirstTimeSent || segInfo.state == SegmentState::InRetxQueue) { // do not sample RTT for retransmitted segments
 		size_t nExpectedSamples = std::max(static_cast<int>(std::ceil(m_nInFlight / 2.0)), 1);
-		m_rttEstimator.addMeasurement(recvSegNo, rtt, nExpectedSamples);
+
+		time::steady_clock::duration cur = time::steady_clock::now() - m_startTime;
+		double now = (double) cur.count() / 1000000000;
+		m_rttEstimator.addMeasurement(recvSegNo, now, rtt, nExpectedSamples);
 		m_segmentInfo.erase(recvSegNo); // remove the entry associated with the received segment
 	}
 	else { // retransmission

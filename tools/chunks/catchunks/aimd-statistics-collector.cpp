@@ -39,7 +39,7 @@ StatisticsCollector::StatisticsCollector(PipelineInterestsAimd& pipeline,
   , m_osRate(osRate)
 {
   m_osCwnd << "time\tcwndsize\n";
-  m_osRtt  << "segment\trtt\trttvar\tsrtt\trto\n";
+  m_osRtt  << "segment\ttime\trtt\trttvar\tsrtt\trto\n";
   m_osRate << "time\tpps\tkbps\n";
   pipeline.afterCwndChange.connect(
     [this] (Milliseconds timeElapsed, double cwnd) {
@@ -48,6 +48,7 @@ StatisticsCollector::StatisticsCollector(PipelineInterestsAimd& pipeline,
   rttEstimator.afterRttMeasurement.connect(
     [this] (const RttRtoSample& rttSample) {
       m_osRtt << rttSample.segNo << '\t'
+              << rttSample.now << '\t'
               << rttSample.rtt.count() << '\t'
               << rttSample.rttVar.count() << '\t'
               << rttSample.sRtt.count() << '\t'

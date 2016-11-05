@@ -35,6 +35,7 @@ typedef time::duration<double, time::milliseconds::period> Milliseconds;
 struct RttRtoSample
 {
   uint64_t segNo;
+  double now;
   Milliseconds rtt; ///< measured RTT
   Milliseconds sRtt; ///< smoothed RTT
   Milliseconds rttVar; ///< RTT variation
@@ -96,7 +97,7 @@ public:
    *        refer to Appendix G of RFC 7323 for details.
    */
   void
-  addMeasurement(uint64_t segNo, Milliseconds rtt, size_t nExpectedSamples);
+  addMeasurement(uint64_t segNo, double now, Milliseconds rtt, size_t nExpectedSamples);
 
   /**
    * @return estimated RTO

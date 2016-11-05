@@ -40,7 +40,7 @@ RttEstimator::RttEstimator(const Options& options)
 }
 
 void
-RttEstimator::addMeasurement(uint64_t segNo, Milliseconds rtt, size_t nExpectedSamples)
+RttEstimator::addMeasurement(uint64_t segNo, double now, Milliseconds rtt, size_t nExpectedSamples)
 {
   BOOST_ASSERT(nExpectedSamples > 0);
 
@@ -59,7 +59,7 @@ RttEstimator::addMeasurement(uint64_t segNo, Milliseconds rtt, size_t nExpectedS
 
   m_rto = ndn::clamp(m_rto, m_options.minRto, m_options.maxRto);
 
-  afterRttMeasurement({segNo, rtt, m_sRtt, m_rttVar, m_rto});
+  afterRttMeasurement({segNo, now, rtt, m_sRtt, m_rttVar, m_rto});
 }
 
 void
