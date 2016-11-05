@@ -40,7 +40,7 @@ StatisticsCollector::StatisticsCollector(PipelineInterestsAimd& pipeline,
 {
   m_osCwnd << "time\tcwndsize\n";
   m_osRtt  << "segment\trtt\trttvar\tsrtt\trto\n";
-  m_osRate << "time\trate\tpps\tkbps\n";
+  m_osRate << "time\tpps\tkbps\n";
   pipeline.afterCwndChange.connect(
     [this] (Milliseconds timeElapsed, double cwnd) {
       m_osCwnd << timeElapsed.count() / 1000 << '\t' << cwnd << '\n';
