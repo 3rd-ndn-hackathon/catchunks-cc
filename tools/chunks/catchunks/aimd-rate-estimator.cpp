@@ -38,7 +38,7 @@ RateEstimator::addMeasurement(double now, uint64_t nPackets, uint64_t nBits)
   double pps = nPackets / m_rateInterval;
   double kbps = nBits / m_rateInterval;
 
-  afterRttMeasurement({now, pps, kbps});
+  afterRateMeasurement({now, pps, kbps});
 }
 
 // std::ostream&
