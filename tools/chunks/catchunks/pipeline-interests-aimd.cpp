@@ -106,7 +106,7 @@ PipelineInterestsAimd::checkRate()
 
   m_nPackets = 0;
   m_nBits = 0;
-  m_scheduler.scheduleEvent(m_options.rateInterval * 10 , [this] { checkRate(); });
+  m_scheduler.scheduleEvent(m_options.rateInterval / 10 , [this] { checkRate(); });
 
 }
 
