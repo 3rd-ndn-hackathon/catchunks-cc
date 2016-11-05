@@ -105,6 +105,11 @@ public:
   Milliseconds
   getEstimatedRto() const;
 
+  Milliseconds
+  getSmoothedRtt() const
+  {
+    return m_sRtt;
+  }
   /**
    * @brief backoff RTO by the factor of RttEstimatorOptions::rtoBackoffMultiplier
    */
