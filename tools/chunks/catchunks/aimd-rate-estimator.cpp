@@ -36,7 +36,7 @@ void
 RateEstimator::addMeasurement(double now, uint64_t nPackets, uint64_t nBits)
 {
   double pps = nPackets / m_rateInterval;
-  double kbps = nBits / m_rateInterval;
+  double kbps = (nBits / m_rateInterval) / 1000;
 
   afterRateMeasurement({now, pps, kbps});
 }
