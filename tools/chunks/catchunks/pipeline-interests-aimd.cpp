@@ -215,7 +215,7 @@ void PipelineInterestsAimd::handleData(const Interest& interest, const Data& dat
 		return;
 
 	m_nPackets += 1;
-	m_nBits += data.getContent().size();
+	m_nBits += data.getContent().size() * 8;
 
 	// Data name will not have extra components because MaxSuffixComponents is set to 1
 	BOOST_ASSERT(data.getName().equals(interest.getName()));
