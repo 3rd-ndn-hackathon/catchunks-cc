@@ -47,7 +47,7 @@ struct PipelineInterestsAimdOptions : public Options
   time::milliseconds rtoCheckInterval = time::milliseconds(10); ///<  time interval for checking retransmission timer
   bool disableCwa = false; ///< disable Conservative Window Adaptation
   bool resetCwndToInit = false; ///< reduce cwnd to initCwnd when loss event occurs
-  time::milliseconds rateInterval = time::milliseconds(1000);
+  double rateInterval = 0.1; 
 };
 
 /**
