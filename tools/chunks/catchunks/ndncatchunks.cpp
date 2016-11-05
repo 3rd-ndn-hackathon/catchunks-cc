@@ -266,7 +266,7 @@ main(int argc, char** argv)
           }
         }
         if (!ratePath.empty()) {
-          statsFileRate.open(rttPath);
+          statsFileRate.open(ratePath);
           if (statsFileRate.fail()) {
             std::cerr << "ERROR: failed to open " << rttPath << std::endl;
             return 4;
