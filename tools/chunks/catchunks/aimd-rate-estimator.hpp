@@ -52,7 +52,7 @@ public:
    *
    * Configures the RTT Estimator with the default parameters if an instance of Options
    * is not passed to the constructor.
-   */
+   */ 
   explicit
   RateEstimator(double rateInterval);
 
