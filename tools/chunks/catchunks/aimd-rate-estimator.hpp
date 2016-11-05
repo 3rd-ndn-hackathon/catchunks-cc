@@ -1,7 +1,5 @@
 /**
- * Copyright (c) 2016,  Regents of the University of California,
- *                      Colorado State University,
- *                      University Pierre & Marie Curie, Sorbonne University.
+ * Copyright (c) 2016,  Arizona Board of Regents.
  *
  * This file is part of ndn-tools (Named Data Networking Essential Tools).
  * See AUTHORS.md for complete list of ndn-tools authors and contributors.
@@ -19,39 +17,65 @@
  *
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  *
- * @author Weiwei Liu
+ * @author Teng Liang
  */
 
-#ifndef NDN_TOOLS_CHUNKS_CATCHUNKS_AIMD_STATISTICS_COLLECTOR_HPP
-#define NDN_TOOLS_CHUNKS_CATCHUNKS_AIMD_STATISTICS_COLLECTOR_HPP
+#ifndef NDN_TOOLS_CHUNKS_CATCHUNKS_AIMD_RATE_ESTIMATOR_HPP
+#define NDN_TOOLS_CHUNKS_CATCHUNKS_AIMD_RATE_ESTIMATOR_HPP
 
-#include "pipeline-interests-aimd.hpp"
-#include "aimd-rtt-estimator.hpp"
+#include "core/common.hpp"
 
 namespace ndn {
 namespace chunks {
 namespace aimd {
 
+typedef time::duration<double, time::milliseconds::period> Milliseconds;
+
+struct RateSample
+{
+  double now;
+  double pps;
+  double kbps;
+};
+
 /**
- * @brief Statistics collector for AIMD pipeline
+ * @brief Rate Estimator.
+ *
  */
-class StatisticsCollector : noncopyable
+class RateEstimator
 {
 public:
-  StatisticsCollector(PipelineInterestsAimd& pipeline,
-  					  RttEstimator& rttEstimator,
-  					  RateEstimator& rateEstimator,
-                      std::ostream& osCwnd, std::ostream& osRtt,
-                      std::ostream& osRate);
 
-private:
-  std::ostream& m_osCwnd;
-  std::ostream& m_osRtt;
-  std::ostream& m_osRate;
+
+  /**
+   * @brief create a RTT Estimator
+   *
+   * Configures the RTT Estimator with the default parameters if an instance of Options
+   * is not passed to the constructor.
+   */
+  explicit
+  RateEstimator(double rateInterval);
+
+
+  void
+  addMeasurement(double now, uint64_t nPackets, uint64_t nBits);
+
+  /**
+   * @brief Signals after rate is measured
+   */
+  signal::Signal<RateEstimator, RateSample> afterRateMeasurement;
+
+
+PUBLIC_WITH_TESTS_ELSE_PRIVATE:
+  double m_rateInterval;
 };
+
+
+// std::ostream&
+// operator<<(std::ostream& os, double rateInterval);
 
 } // namespace aimd
 } // namespace chunks
 } // namespace ndn
 
-#endif // NDN_TOOLS_CHUNKS_CATCHUNKS_AIMD_STATISTICS_COLLECTOR_HPP
+#endif // NDN_TOOLS_CHUNKS_CATCHUNKS_RTT_ESTIMATOR_HPP

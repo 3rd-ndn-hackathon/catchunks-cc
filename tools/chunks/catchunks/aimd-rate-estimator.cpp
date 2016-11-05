@@ -1,7 +1,5 @@
 /**
- * Copyright (c) 2016,  Regents of the University of California,
- *                      Colorado State University,
- *                      University Pierre & Marie Curie, Sorbonne University.
+ * Copyright (c) 2016,  Arizona Board of Regents.
  *
  * This file is part of ndn-tools (Named Data Networking Essential Tools).
  * See AUTHORS.md for complete list of ndn-tools authors and contributors.
@@ -19,39 +17,38 @@
  *
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  *
- * @author Weiwei Liu
+ * @author Teng Liang
  */
 
-#ifndef NDN_TOOLS_CHUNKS_CATCHUNKS_AIMD_STATISTICS_COLLECTOR_HPP
-#define NDN_TOOLS_CHUNKS_CATCHUNKS_AIMD_STATISTICS_COLLECTOR_HPP
-
-#include "pipeline-interests-aimd.hpp"
-#include "aimd-rtt-estimator.hpp"
+#include "aimd-rate-estimator.hpp"
+#include <cmath>
 
 namespace ndn {
 namespace chunks {
 namespace aimd {
 
-/**
- * @brief Statistics collector for AIMD pipeline
- */
-class StatisticsCollector : noncopyable
+RateEstimator::RateEstimator(double rateInterval)
+  : m_rateInterval(rateInterval)
 {
-public:
-  StatisticsCollector(PipelineInterestsAimd& pipeline,
-  					  RttEstimator& rttEstimator,
-  					  RateEstimator& rateEstimator,
-                      std::ostream& osCwnd, std::ostream& osRtt,
-                      std::ostream& osRate);
+}
 
-private:
-  std::ostream& m_osCwnd;
-  std::ostream& m_osRtt;
-  std::ostream& m_osRate;
-};
+void
+RateEstimator::addMeasurement(double now, uint64_t nPackets, uint64_t nBits)
+{
+  double pps = nPackets / m_rateInterval;
+  double kbps = nBits / m_rateInterval;
+
+  afterRttMeasurement({now, pps, kbps});
+}
+
+// std::ostream&
+// operator<<(std::ostream& os, double rateInterval)
+// {
+//   os << "RateEstimator initial parameters:\n"
+//      << "\tRate Interval = " << rateInterval << "\n";
+//   return os;
+// }
 
 } // namespace aimd
 } // namespace chunks
 } // namespace ndn
-
-#endif // NDN_TOOLS_CHUNKS_CATCHUNKS_AIMD_STATISTICS_COLLECTOR_HPP

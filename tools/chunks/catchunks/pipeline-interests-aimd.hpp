@@ -28,6 +28,7 @@
 
 #include "options.hpp"
 #include "aimd-rtt-estimator.hpp"
+#include "aimd-rate-estimator.hpp"
 #include "pipeline-interests.hpp"
 
 #include <queue>
@@ -46,6 +47,7 @@ struct PipelineInterestsAimdOptions : public Options
   time::milliseconds rtoCheckInterval = time::milliseconds(10); ///<  time interval for checking retransmission timer
   bool disableCwa = false; ///< disable Conservative Window Adaptation
   bool resetCwndToInit = false; ///< reduce cwnd to initCwnd when loss event occurs
+  time::milliseconds rateInterval = time::milliseconds(1000);
 };
 
 /**
@@ -97,7 +99,9 @@ public:
    * Configures the pipelining service without specifying the retrieval namespace. After this
    * configuration the method run must be called to start the Pipeline.
    */
-  PipelineInterestsAimd(Face& face, RttEstimator& rttEstimator,
+  PipelineInterestsAimd(Face& face,
+                        RttEstimator& rttEstimator,
+                        RateEstimator& rateEstimator,
                         const Options& options = Options());
 
   ~PipelineInterestsAimd() final;
@@ -132,6 +136,9 @@ private:
    */
   void
   checkRto();
+
+  void
+  checkRate();
 
   /**
    * @param segNo the segment # of the to-be-sent Interest
@@ -185,6 +192,7 @@ private:
 PUBLIC_WITH_TESTS_ELSE_PRIVATE:
   const Options m_options;
   RttEstimator& m_rttEstimator;
+  RateEstimator& m_rateEstimator;
   Scheduler m_scheduler;
   uint64_t m_nextSegmentNo;
   size_t m_receivedSize;
@@ -215,6 +223,10 @@ PUBLIC_WITH_TESTS_ELSE_PRIVATE:
   bool m_hasFailure;
   uint64_t m_failedSegNo;
   std::string m_failureReason;
+
+  //for Rate measurement
+  uint64_t m_nPackets;
+  uint64_t m_nBits;
 };
 
 std::ostream&

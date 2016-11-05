@@ -36,6 +36,7 @@
 #include "pipeline-interests-aimd.hpp"
 #include "aimd-rtt-estimator.hpp"
 #include "aimd-statistics-collector.hpp"
+#include "aimd-rate-estimator.hpp"
 
 #include <ndn-cxx/security/validator-null.hpp>
 #include <fstream>
@@ -58,9 +59,9 @@ main(int argc, char** argv)
   // i.e. only reduce window size at most once per RTT
   bool disableCwa(false), resetCwndToInit(false);
   double aiStep(1.0), mdCoef(0.5), alpha(0.125), beta(0.25),
-         minRto(200.0), maxRto(4000.0);
+         minRto(200.0), maxRto(4000.0), rateInterval(1.0);
   int initCwnd(1), initSsthresh(std::numeric_limits<int>::max()), k(4);
-  std::string cwndPath, rttPath;
+  std::string cwndPath, rttPath, ratePath;
 
   namespace po = boost::program_options;
   po::options_description basicDesc("Basic Options");
@@ -98,6 +99,10 @@ main(int argc, char** argv)
                         "log file for AIMD cwnd statistics")
     ("aimd-debug-rtt", po::value<std::string>(&rttPath),
                        "log file for AIMD rtt statistics")
+    ("aimd-debug-rate", po::value<std::string>(&ratePath),
+                       "log file for AIMD rate statistics")
+    ("aimd-debug-rate-interval", po::value<double>(&rateInterval)->default_value(rateInterval),
+                       "AIMD rate Interval")
     ("aimd-disable-cwa", po::bool_switch(&disableCwa),
                          "disable Conservative Window Adaptation, "
                          "i.e. reduce window on each timeout (instead of at most once per RTT)")
@@ -212,8 +217,10 @@ main(int argc, char** argv)
     unique_ptr<PipelineInterests> pipeline;
     unique_ptr<aimd::StatisticsCollector> statsCollector;
     unique_ptr<aimd::RttEstimator> rttEstimator;
+    unique_ptr<aimd::RateEstimator> rateEstimator;
     std::ofstream statsFileCwnd;
     std::ofstream statsFileRtt;
+    std::ofstream statsFileRate;
 
     if (pipelineType == "fixed") {
       PipelineInterestsFixedWindow::Options optionsPipeline(options);
@@ -230,6 +237,7 @@ main(int argc, char** argv)
       optionsRttEst.maxRto = aimd::Milliseconds(maxRto);
 
       rttEstimator = make_unique<aimd::RttEstimator>(optionsRttEst);
+      rateEstimator = make_unique<aimd::RateEstimator>(rateInterval);
 
       PipelineInterestsAimd::Options optionsPipeline;
       optionsPipeline.isVerbose = options.isVerbose;
@@ -240,9 +248,9 @@ main(int argc, char** argv)
       optionsPipeline.aiStep = aiStep;
       optionsPipeline.mdCoef = mdCoef;
 
-      auto aimdPipeline = make_unique<PipelineInterestsAimd>(face, *rttEstimator, optionsPipeline);
+      auto aimdPipeline = make_unique<PipelineInterestsAimd>(face, *rttEstimator, *rateEstimator, optionsPipeline);
 
-      if (!cwndPath.empty() || !rttPath.empty()) {
+      if (!cwndPath.empty() || !rttPath.empty() || !ratePath.empty()) {
         if (!cwndPath.empty()) {
           statsFileCwnd.open(cwndPath);
           if (statsFileCwnd.fail()) {
@@ -257,8 +265,17 @@ main(int argc, char** argv)
             return 4;
           }
         }
+        if (!ratePath.empty()) {
+          statsFileRate.open(rttPath);
+          if (statsFileRate.fail()) {
+            std::cerr << "ERROR: failed to open " << rttPath << std::endl;
+            return 4;
+          }
+        }
         statsCollector = make_unique<aimd::StatisticsCollector>(*aimdPipeline, *rttEstimator,
-                                                                statsFileCwnd, statsFileRtt);
+                                                                *rateEstimator,
+                                                                statsFileCwnd, statsFileRtt,
+                                                                statsFileRate);
       }
 
       pipeline = std::move(aimdPipeline);

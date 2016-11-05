@@ -28,13 +28,19 @@ namespace ndn {
 namespace chunks {
 namespace aimd {
 
-StatisticsCollector::StatisticsCollector(PipelineInterestsAimd& pipeline, RttEstimator& rttEstimator,
-                                         std::ostream& osCwnd, std::ostream& osRtt)
+StatisticsCollector::StatisticsCollector(PipelineInterestsAimd& pipeline,
+                                         RttEstimator& rttEstimator,
+                                         RateEstimator& rateEstimator,
+                                         std::ostream& osCwnd,
+                                         std::ostream& osRtt,
+                                         std::ostream& osRate)
   : m_osCwnd(osCwnd)
   , m_osRtt(osRtt)
+  , m_osRate(osRate)
 {
   m_osCwnd << "time\tcwndsize\n";
   m_osRtt  << "segment\trtt\trttvar\tsrtt\trto\n";
+  m_osRate << "time\trate\tpps\tkbps\n";
   pipeline.afterCwndChange.connect(
     [this] (Milliseconds timeElapsed, double cwnd) {
       m_osCwnd << timeElapsed.count() / 1000 << '\t' << cwnd << '\n';
@@ -46,6 +52,12 @@ StatisticsCollector::StatisticsCollector(PipelineInterestsAimd& pipeline, RttEst
               << rttSample.rttVar.count() << '\t'
               << rttSample.sRtt.count() << '\t'
               << rttSample.rto.count() << '\n';
+    });
+  rateEstimator.afterRateMeasurement.connect(
+    [this] (const RateSample& rateSample) {
+      m_osRate << rateSample.now << '\t'
+               << rateSample.pps << '\t'
+               << rateSample.kbps << '\n';
     });
 }
 

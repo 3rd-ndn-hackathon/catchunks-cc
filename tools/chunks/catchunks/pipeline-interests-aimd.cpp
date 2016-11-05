@@ -31,11 +31,14 @@ namespace ndn {
 namespace chunks {
 namespace aimd {
 
-PipelineInterestsAimd::PipelineInterestsAimd(Face& face, RttEstimator& rttEstimator,
+PipelineInterestsAimd::PipelineInterestsAimd(Face& face,
+                                             RttEstimator& rttEstimator,
+                                             RateEstimator& rateEstimator,
                                              const Options& options)
   : PipelineInterests(face)
   , m_options(options)
   , m_rttEstimator(rttEstimator)
+  , m_rateEstimator(rateEstimator)
   , m_scheduler(m_face.getIoService())
   , m_nextSegmentNo(0)
   , m_receivedSize(0)
@@ -73,6 +76,9 @@ PipelineInterestsAimd::doRun()
   // schedule the event to check retransmission timer
   m_scheduler.scheduleEvent(m_options.rtoCheckInterval, [this] { checkRto(); });
 
+  // schedule the event to check rate at rate interval timer
+  m_scheduler.scheduleEvent(m_options.rateInterval, [this] { checkRate(); });
+
   sendInterest(getNextSegmentNo(), false);
 }
 
@@ -85,6 +91,23 @@ PipelineInterestsAimd::doCancel()
   }
   m_segmentInfo.clear();
   m_scheduler.cancelAllEvents();
+}
+
+void
+PipelineInterestsAimd::checkRate()
+{
+  if (isStopping())
+    return;
+
+  time::steady_clock::duration cur = time::steady_clock::now()-m_startTime;
+  double now = (double)cur.count() / 1000000000;
+
+  m_rateEstimator.addMeasurement(now, m_nPackets, m_nBits);
+
+  m_nPackets = 0;
+  m_nBits = 0;
+  m_scheduler.scheduleEvent(m_options.rateInterval, [this] { checkRate(); });
+
 }
 
 void
@@ -212,6 +235,9 @@ PipelineInterestsAimd::handleData(const Interest& interest, const Data& data)
 {
   if (isStopping())
     return;
+
+  m_nPackets += 1;
+  m_nBits += data.getContent().size();
 
   // Data name will not have extra components because MaxSuffixComponents is set to 1
   BOOST_ASSERT(data.getName().equals(interest.getName()));
