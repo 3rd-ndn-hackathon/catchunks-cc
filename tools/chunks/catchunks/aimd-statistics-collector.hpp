@@ -27,6 +27,7 @@
 
 #include "pipeline-interests-aimd.hpp"
 #include "pipeline-interests-cubic.hpp"
+#include "pipeline-interests-tcpbic.hpp"
 #include "aimd-rtt-estimator.hpp"
 #include "aimd-rate-estimator.hpp"
 
@@ -47,6 +48,12 @@ public:
                       std::ostream& osRate);
 
   StatisticsCollector(PipelineInterestsCubic& pipeline,
+  					  RttEstimator& rttEstimator,
+  					  RateEstimator& rateEstimator,
+                      std::ostream& osCwnd, std::ostream& osRtt,
+                      std::ostream& osRate);
+
+  StatisticsCollector(PipelineInterestsTcpBic& pipeline,
   					  RttEstimator& rttEstimator,
   					  RateEstimator& rateEstimator,
                       std::ostream& osCwnd, std::ostream& osRtt,
