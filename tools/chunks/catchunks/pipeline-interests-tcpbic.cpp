@@ -433,6 +433,7 @@ if (m_cwnd < LOW_WINDOW) {
       is_bic_ss = false;
     }
   }
+  afterCwndChange(time::steady_clock::now() - m_startTime, m_cwnd);
 }
 
 void PipelineInterestsTcpBic::decreaseWindow()
@@ -461,6 +462,7 @@ void PipelineInterestsTcpBic::decreaseWindow()
     m_ssthresh = m_cwnd * m_beta;
     m_cwnd = m_initialWindow;
   }
+  afterCwndChange(time::steady_clock::now() - m_startTime, m_cwnd);
 }
 
 uint64_t PipelineInterestsTcpBic::getNextSegmentNo()
