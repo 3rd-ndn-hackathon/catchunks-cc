@@ -72,7 +72,7 @@ main(int argc, char** argv)
     ("discover-version,d",  po::value<std::string>(&discoverType)->default_value(discoverType),
                             "version discovery algorithm to use; valid values are: 'fixed', 'iterative'")
     ("pipeline-type,t",  po::value<std::string>(&pipelineType)->default_value(pipelineType),
-                         "type of Interest pipeline to use; valid values are: 'fixed', 'aimd', 'cubic'")
+                         "type of Interest pipeline to use; valid values are: 'fixed', 'aimd', 'cubic', 'tcpbic'")
     ("fresh,f",     po::bool_switch(&options.mustBeFresh), "only return fresh content")
     ("lifetime,l",  po::value<uint64_t>()->default_value(options.interestLifetime.count()),
                     "lifetime of expressed Interests, in milliseconds")
