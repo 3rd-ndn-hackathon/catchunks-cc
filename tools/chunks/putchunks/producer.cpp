@@ -113,10 +113,12 @@ Producer::populateStore(std::istream& is)
 {
   BOOST_ASSERT(m_store.size() == 0);
 
-  if (m_isVerbose)
+//  if (m_isVerbose)
+  time::steady_clock::time_point start = time::steady_clock::now();
     std::cerr << "Loading input ..." << std::endl;
 
   std::vector<uint8_t> buffer(m_maxSegmentSize);
+  
   while (is.good()) {
     is.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
     const auto nCharsRead = is.gcount();
@@ -141,8 +143,15 @@ Producer::populateStore(std::istream& is)
     m_keyChain.sign(*data, m_signingInfo);
   }
 
-  if (m_isVerbose)
+//  if (m_isVerbose)
     std::cerr << "Created " << m_store.size() << " chunks for prefix " << m_prefix << std::endl;
+
+    
+    time::steady_clock::time_point end = time::steady_clock::now();
+    time::steady_clock::duration dur = end - start;
+    
+    std::cerr << "Finished after " << (double)dur.count() / 1000000 <<  " milliseconds!\n";
+    
 }
 
 void

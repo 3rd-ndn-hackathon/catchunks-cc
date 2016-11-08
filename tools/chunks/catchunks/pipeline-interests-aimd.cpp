@@ -61,7 +61,8 @@ void PipelineInterestsAimd::doRun()
 	m_scheduler.scheduleEvent(m_options.rtoCheckInterval, [this] {checkRto();});
 
 	// schedule the event to check rate at rate interval timer
-	m_scheduler.scheduleEvent(time::milliseconds((int)(m_options.rateInterval*1000)), [this] {checkRate();});
+	m_scheduler.scheduleEvent(time::milliseconds((int) (m_options.rateInterval * 1000)),
+			[this] {checkRate();});
 
 	sendInterest(getNextSegmentNo(), false);
 }
@@ -88,7 +89,8 @@ void PipelineInterestsAimd::checkRate()
 
 	m_nPackets = 0;
 	m_nBits = 0;
-	m_scheduler.scheduleEvent(time::milliseconds((int)(m_options.rateInterval*1000)), [this] {checkRate();});
+	m_scheduler.scheduleEvent(time::milliseconds((int) (m_options.rateInterval * 1000)),
+			[this] {checkRate();});
 
 }
 
