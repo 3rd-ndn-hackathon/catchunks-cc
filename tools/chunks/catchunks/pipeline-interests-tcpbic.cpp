@@ -450,7 +450,7 @@ void PipelineInterestsTcpBic::decreaseWindow()
   }
   else {
     // Normal TCP
-    m_ssthresh = m_cwnd * m_beta;
+    m_ssthresh = m_cwnd * 0.5;
     m_cwnd = m_ssthresh;
 
     //if (resetToInitial) {
@@ -459,7 +459,7 @@ void PipelineInterestsTcpBic::decreaseWindow()
   }
 
   if (resetToInitial) {
-    m_ssthresh = m_cwnd * m_beta;
+    m_ssthresh = m_cwnd * 0.5;
     m_cwnd = m_initialWindow;
   }
   afterCwndChange(time::steady_clock::now() - m_startTime, m_cwnd);
